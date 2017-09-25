@@ -1,0 +1,397 @@
+/**
+ * 전체 구성
+ */
+.map-div{
+	float:left; 
+	position:relative; 
+	width:75%; 
+	margin-right:2%; 
+	border: 1px solid grey;
+}
+.set-div{
+	float:left;
+	width:18%; 
+	padding-left:2px; 
+	margin-right:5%;
+}
+/**
+add by tea (intruder)
+**/
+input:disabled {
+	background: #EAEAEA;
+}
+
+a.disabled {
+   pointer-events: none;
+   cursor: default;
+}
+/** end tea **/
+.height-div{
+	height:620px;
+}
+
+/** added by tea (intruder)
+*/
+.btn_large{
+	cursor: pointer;
+}
+
+/**
+ * 지도 타입 
+ */
+.map-type-select{
+	position:absolute;
+	right:0%; 
+	z-index:1000; 
+}
+/**
+ * 지도 3D 버튼  
+ */
+.map-3d-button{
+	position:absolute;
+	right:0%;
+	top : 5%; 
+	z-index:1000; 
+	margin : 0px;
+}
+.btn_in_map_right{
+	position:absolute;
+	right:14%;
+	z-index:1000;
+	height : 30px;
+}
+
+
+/**
+ * 층별 라디오 버튼
+ */
+.radio-div {
+	text-align:center;
+	font-size:15px;
+	font-weight: bold;
+	position:relative; 
+	z-index:1000; 
+	bottom:0%;
+	background:rgba(255, 255, 255, 0.7);
+	margin:2px;
+	border-radius: 8px;
+    height: 240px;
+    max-height:300px;
+    overflow-x:hidden;
+    overflow-y:scroll;
+}
+.radio-hover-bottom{
+	padding:1px;
+     border-bottom: 1px dotted rgba(0,0,0,0.5);	
+}
+#chkFloor input[type=radio] {
+    display:none; 
+    margin:10px;
+}
+#chkFloor input[type=radio] + label {
+    display:inline-block;
+    margin:-2px;
+    padding: 4px 12px;
+    /* background-color: #e7e7e7; */
+}
+#chkFloor input[type=radio]:checked + label { 
+   background-image: none;
+   background-color: #a895d9;
+}
+
+/**
+ * 스크롤 바
+ */
+#chkFloor::-webkit-scrollbar-track
+{
+	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+	border-radius: 10px;
+	background-color: #F5F5F5;
+}
+
+#chkFloor::-webkit-scrollbar
+{
+	width: 12px;
+	background-color: #F5F5F5;
+}
+
+#chkFloor::-webkit-scrollbar-thumb
+{
+	border-radius: 10px;
+	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);
+	background-color: #555;
+}
+
+
+
+
+.bottom-bar{
+	border-bottom: 1px solid grey;
+}
+
+.btn-2d-style{
+	width:100%;
+	text-align:center;
+	text-weight:bold;
+}
+
+.hidden{
+	display : none;
+}
+.show {
+	display : display;
+}
+
+.select{
+	color: #fff;
+	background : rgba(0, 0, 0, 0.8);	
+}
+.un-select{
+	color : #000;
+	background : rgba(255, 255, 255, 0);
+}
+
+/**
+ * 지역구역 등록 전체 스타일
+ */
+#linker-register {  }
+	#linker-register #page-header > div {  }
+	#linker-register #page-header > div > h3 { display:inline-block;padding-right:10px; }
+	#linker-register input[type=text]{ width:100%;}
+	#linker-register .btn_in_map {float: left; margin: 5px;}
+	#linker-register .with_space {margin-top: 5px; margin-left: 30px; margin-right: 5px;}
+
+	#linker-register .active {
+		background:#555; color:#FFF;
+	}
+	#linker-register .disabled {
+   		pointer-events: none;
+   		cursor: default;
+	}
+	#linker-register .none-active {
+		background:#FFF; color:#000;
+	}
+	
+	
+	
+/**
+ * 지역 콘텐츠 관리 전체 스타일
+ */
+#region-manager {  }
+   #region-manager #page-header > div {  }
+   #region-manager #page-header > div > h3 { display:inline-block;padding-right:10px; }
+   #region-manager input[type=text]{ width:100%;}
+   #region-manager .btn_in_map {float: left; margin: 5px;}
+   #region-manager .with_space {margin-top: 5px; margin-left: 30px; margin-right: 5px;}
+
+   #region-manager .active {
+      background:#555; color:#FFF;
+   }
+   #region-manager .disabled {
+         pointer-events: none;
+         cursor: default;
+   }
+   #region-manager .none-active {
+      background:#FFF; color:#000;
+   }
+   	
+/**
+ * 지역구역 조회 전체 스타일
+ */
+#linker-view {  }
+   #linker-view #page-header > div {  }
+   #linker-view #page-header > div > h3 { display:inline-block;padding-right:10px; }
+   #linker-view input[type=text]{ width:100%;}
+   #linker-view .btn_in_map {float: left; margin: 5px;}
+   #linker-view .with_space {margin-top: 5px; margin-left: 30px; margin-right: 5px;}
+
+   #linker-view .active {
+      background:#555; color:#FFF;
+   }
+   #linker-view .disabled {
+         pointer-events: none;
+         cursor: default;
+   }
+   #linker-view .none-active {
+      background:#FFF; color:#000;
+   }
+
+
+
+
+
+/**
+ * 실내외 공간정보 연계 전체 스타일
+ */
+#linker-in-out {  }
+	#linker-in-out #page-header > div {  }
+	#linker-in-out #page-header > div > h3 { display:inline-block;padding-right:10px; }
+	#linker-in-out input[type=text]{ width:100%;}
+	#linker-in-out .btn_in_map {float: left; margin: 5px;}
+	#linker-in-out .with_space {margin-top: 5px; margin-left: 30px; margin-right: 5px;}
+
+	#linker-in-out .active {
+		background:#555; color:#FFF;
+	}
+	#linker-in-out .disabled {
+   		pointer-events: none;
+   		cursor: default;
+	}
+	#linker-in-out .none-active {
+		background:#FFF; color:#000;
+	}	
+
+	
+/**
+ * 검색 테이블 스타일
+ */ 
+.table-border {
+	background:#666; 
+	color:#FFF; 
+	margin:2px;
+}  
+.table-div-style{
+    -webkit-margin-before: 1.33em;
+    -webkit-margin-after: 1.33em;
+    -webkit-margin-start: 0px;
+    -webkit-margin-end: 0px;
+    font-weight: bold;
+    margin-bottom:0px;
+}
+.scrolltbody tbody {
+    display: block; 
+    width: 100%;
+    height: 150px;
+    overflow-y: scroll;
+    text-align:center;
+}
+.scrolltbody td:nth-of-type(1) { width: 40%; }
+.scrolltbody td:nth-of-type(2) { width: 40%; }
+.scrolltbody td:nth-of-type(3) { width: 20%; font-size:12px; }
+.scrolltbody td:last-child { width: calc( 100px - 19px );  }
+
+/**
+ * Info  테이블 간격
+ */
+.table-padding > th {
+	padding-top : 10px;
+	padding-bottom: 10px;
+}
+
+/**
+ * 스크롤 바
+ */
+#tbody::-webkit-scrollbar-track
+{
+	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+	border-radius: 10px;
+	background-color: #F5F5F5;
+}
+
+#tbody::-webkit-scrollbar
+{
+	width: 5px;
+	background-color: #F5F5F5;
+}
+
+#tbody::-webkit-scrollbar-thumb
+{
+	border-radius: 3px;
+	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);
+	background-color: #555;
+}
+
+#tbodyBuilding::-webkit-scrollbar-track
+{
+	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+	border-radius: 10px;
+	background-color: #F5F5F5;
+}
+
+#tbodyBuilding::-webkit-scrollbar
+{
+	width: 5px;
+	background-color: #F5F5F5;
+}
+
+#tbodyBuilding::-webkit-scrollbar-thumb
+{
+	border-radius: 3px;
+	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);
+	background-color: #555;
+}
+
+
+
+#tbodySearch::-webkit-scrollbar-track
+{
+	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+	border-radius: 10px;
+	background-color: #F5F5F5;
+}
+
+#tbodySearch::-webkit-scrollbar
+{
+	width: 5px;
+	background-color: #F5F5F5;
+}
+
+#tbodySearch::-webkit-scrollbar-thumb
+{
+	border-radius: 3px;
+	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);
+	background-color: #555;
+}
+
+
+.infoPopup-2d-alert {
+	width:397px; padding:17px 9px 30px 9px; text-align:center; border:1px solid #6f6f6f; 
+	border-top:solid 5px #1972b9; background:#ffffff;
+}
+.infoPopup-2d-alert p.icon_q {letter-spacing:-1px}
+.infoPopup-2d-alert button.btn_cancel {
+	display:inline-block; width:128px; height:40px; text-indent:-99999em;
+	text-align: center;
+	left : 60px;
+	background:url('../../images/2d/btnPopupOK.png') no-repeat;
+}
+
+
+.infoPopup-2d-del-alert {
+	width:397px; padding:17px 9px 30px 9px; text-align:center; border:1px solid #6f6f6f; 
+	border-top:solid 5px #1972b9; background:#ffffff;
+}
+.infoPopup-2d-del-alert p.icon_q {letter-spacing:-1px}
+.infoPopup-2d-del-alert button.btn_enter {
+	display:inline-block; width:128px; height:40px; text-indent:-99999em;
+	text-align: center;
+	left : 60px;
+	background:url('../../images/2d/btnPopupDeleteOk.png') no-repeat;
+}
+.infoPopup-2d-del-alert button.btn_enter_ok {
+	display:inline-block; width:128px; height:40px; text-indent:-99999em;
+	text-align: center;
+	left : 60px;
+	background:url('../../images/2d/btnPopupOK.png') no-repeat;
+}
+.infoPopup-2d-del-alert button.btn_enter_man {
+	display:inline-block; width:128px; height:40px; text-indent:-99999em;
+	text-align: center;
+	left : 60px;
+	background:url('../../images/2d/btnPopupOK.png') no-repeat;
+}
+.infoPopup-2d-del-alert button.btn_cancel {
+	display:inline-block; width:128px; height:40px; text-indent:-99999em;
+	text-align: center;
+	left : 60px;
+	background:url('../../images/2d/cancel.png') no-repeat;
+}
+
+
+
+.tr-background-off{
+	background : rgba(255, 255, 255, 0);
+}
+.tr-background-on{
+	background : rgba(200, 200, 200, 0.7);
+}

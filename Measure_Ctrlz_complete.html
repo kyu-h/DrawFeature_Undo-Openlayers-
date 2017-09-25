@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Measure Features</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- new intruder -->
+	<script type="text/javascript" src="scripts/jquery/jquery-1.9.1.min.js"></script>
+	<script type="text/javascript" src="scripts/bootstrap-3.3.5-dist/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="scripts/bootstrap-3.3.5-dist/js/bootstrap-select.min.js"></script>
+
+	<script src="scripts/ol/proj4.js"></script>
+	
+	
+	<link rel="stylesheet" href="scripts/bootstrap-3.3.5-dist/css/bootstrap.min.css" />
+	<link rel="stylesheet" href="scripts/bootstrap-3.3.5-dist/css/bootstrap-select.min.css" />
+    <link rel="stylesheet" href="ol3-popup.css" /> <!-- kyu -->
+      
+    <title></title>
+    
+    <!-- The line below is only needed for old environments like Internet Explorer and Android 4.x -->
+    <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=requestAnimationFrame,Element.prototype.classList,URL"></script>
+    
+ 
+    <link rel="stylesheet" href="style/css/2d/ol.css" />
+    <script src="scripts/ol/ol-debug.js"></script>
+ 
+
+<!--    <link rel="stylesheet" href="https://openlayers.org/en/v4.2.0/css/ol.css" type="text/css">
+    <script src="https://openlayers.org/en/v4.2.0/build/ol-debug.js"></script>-->
+    
+
+    <script src="scripts/2d-script/mapCommon.js"></script>
+
+    <script src="ol3-popup.js"></script> <!-- kyu -->
+    <style>
+        .tooltip {
+            position: relative;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 4px;
+            color: white;
+            padding: 4px 8px;
+            opacity: 0.7;
+            white-space: nowrap;
+        }
+        .tooltip-static {
+            background-color: #ffcc33;
+            color: black;
+            border: 1px solid white;
+        }
+        /*.tooltip-measure:before,*/
+        .tooltip-static:before {
+            border-top: 6px solid rgba(0, 0, 0, 0.5);
+            border-right: 6px solid transparent;
+            border-left: 6px solid transparent;
+            content: "";
+            position: absolute;
+            bottom: -6px;
+            margin-left: -7px;
+            left: 50%;
+        }
+        .tooltip-static:before {
+            border-top-color: #ffcc33;
+        }
+        
+        .undo-arrow, .redo-arrow {
+            background-color: #ffffff;
+            width : 30px;
+            height: 30px;
+            display: block;
+            margin-left: -6px;
+            margin-right: -6px;
+            margin-bottom: -2px;
+            margin-top: -2px;
+            
+        }
+        
+        #visMap {
+            z-index: 1;
+		    width: 100%;
+		    height: 600px;
+        }
+    </style>
+  </head>
+  <body>
+    <div id="visMap" class="map">
+        <div style="position:absolute; z-index:1000; right:30px; top: 20px;">
+            <select id="type">
+              <option value="none">None</option>
+              <option value="length">Length (LineString)</option>
+              <option value="area">Area (Polygon)</option>
+            </select>
+		</div>
+        <div style="position:absolute; z-index:1000; right:30px; top: 50px;">
+            <button id="ctrlz" type="submit"><img class="undo-arrow" src="undo-arrow.png"></button>
+            <button id="ctrly" type="submit"><img class="redo-arrow" src="redo-arrow.png"></button>
+        </div>
+    </div>
+    <form class="form-inline" style="visibility: hidden">
+        <label class="checkbox">
+          <input type="checkbox" id="geodesic">
+          use geodesic measures
+        </label>
+    </form>
+      <button id="clearall" style="visibility: hidden">Clear all measures</button>
+      <button id="finish" style="visibility: hidden">finish</button>
+    <script>
+        $(function () {
+            var wgs84Sphere = new ol.Sphere(6378137);
+
+            var raster = new ol.layer.Tile({
+                source: new ol.source.OSM()
+            });
+
+            var source = new ol.source.Vector();
+
+            var vector = new ol.layer.Vector({
+                source: source,
+                style: new ol.style.Style({
+                    fill: new ol.style.Fill({
+                        color: 'rgba(255, 255, 255, 0.2)'
+                    }),
+                    stroke: new ol.style.Stroke({
+                        color: '#ff0000',
+                        width: 2
+                    }),
+                    image: new ol.style.Circle({
+                        radius: 7,
+                        fill: new ol.style.Fill({
+                            color: '#ff0000'
+                        })
+                    })
+                })
+            });
+
+
+            /*************************************************************************
+            *
+            * global variable that Openlayers maked
+            *
+            *************************************************************************/
+
+            var sketch; // Currently drawn feature. @type {ol.Feature}
+            var helpTooltipElement; // The help tooltip element. @type {Element}
+            var helpTooltip; // Overlay to show the help messages. @type {ol.Overlay}
+            var measureTooltipElement; // The measure tooltip element. @type {Element}
+            var measureTooltip; // Overlay to show the measurement. @type {ol.Overlay}
+            var continuePolygonMsg = 'Click to continue drawing the polygon'; // Message to show drawing a polygon.  @type {string}
+            var continueLineMsg = 'Click to continue drawing the line'; // Message to show when the user is drawing a line. @type {string}
+            var continueNone = 'Dragging Mode';
+
+            /*************************************************************************
+            *
+            * global variable for Element
+            *
+            *************************************************************************/
+            var typeSelect = document.getElementById('type');
+            var geodesicCheckbox = document.getElementById('geodesic');
+            
+            /*************************************************************************
+            *
+            * global variable that i make
+            *
+            *************************************************************************/
+            var draw; // global so we can remove it later
+            var count = 0;
+            var countsingleclick = 0;
+            var aaaa = 0;
+            var distance;
+            var countlatitude = new Array(); //위도
+            var countlongtitude = new Array(); //경도
+            var distanceArray = new Array();
+            var widthArraylatitude = new Array();
+            var widthArraylongtitude = new Array();
+            var output;
+            var TotalMeasureOutput;
+            var lastdistance;
+            var areaClick = 0;
+            var ctrlz = 0;
+            var complete = 0;
+
+            /**
+            * Handle pointer move.
+            * @param {ol.MapBrowserEvent} evt The event.
+            */
+            var pointerMoveHandler = function(evt) {  
+                
+                if (evt.dragging) {
+                    return;
+                }
+                /** @type {string} */
+                var helpMsg = 'Click to start drawing';
+                
+                if(typeSelect.value == 'none'){
+                    helpTooltipElement.innerHTML = continueNone;
+                }else if(typeSelect.value == 'length') {
+                    helpTooltipElement.innerHTML = continueLineMsg;
+                }else if(typeSelect.value == 'area'){
+                    helpTooltipElement.innerHTML = continuePolygonMsg;
+                }
+                
+                helpTooltip.setPosition(evt.coordinate);
+                helpTooltipElement.classList.remove('hidden');
+            };
+
+            map = new ol.Map({
+                layers: [raster],
+                target: 'visMap',
+                view: new ol.View({
+                    center: ol.proj.fromLonLat([127.00767, 37.55720]),
+                    minZoom : 10,
+                    maxZoom : 19,
+                    zoom: 11
+                })/*, controls : ol.control.defaults({
+                    rotate: false,
+                    attribution: false}).extend([new ol.control.ScaleLine])*/
+            });	
+            initVWorldMap(map);
+            setTimeout(mapResize, 200);
+            map.addLayer(vector);
+
+            map.on('pointermove', pointerMoveHandler);
+
+            map.getViewport().addEventListener('mouseout', function() {
+                helpTooltipElement.classList.add('hidden');
+            });
+            
+
+
+            /**
+            * Format length output.
+            * @param {ol.geom.LineString} line The line.
+            * @return {string} The formatted length.
+            */
+            var formatLength = function(line) {
+                var length;
+                if (geodesicCheckbox.checked) {
+                    var coordinates = line.getCoordinates();
+                    length = 0;
+                    var sourceProj = map.getView().getProjection();
+                    for (var i = 0, ii = coordinates.length - 1; i < ii; ++i) {
+                        var c1 = ol.proj.transform(coordinates[i], sourceProj, 'EPSG:4326');
+                        var c2 = ol.proj.transform(coordinates[i + 1], sourceProj, 'EPSG:4326');
+                        length += wgs84Sphere.haversineDistance(c1, c2);
+                    }
+                } else {
+                    length = Math.round(line.getLength() * 100) / 100;
+                }
+                var output;
+                if (length > 0) {
+                    output = (Math.round(length * 100) / 100);
+                } 
+                return output;
+            };
+
+
+            /**
+            * Format area output.
+            * @param {ol.geom.Polygon} polygon The polygon.
+            * @return {string} Formatted area.
+            */
+            var formatArea = function(polygon) {
+                var area;
+                if (geodesicCheckbox.checked) {
+                    var sourceProj = map.getView().getProjection();
+                    var geom = /** @type {ol.geom.Polygon} */(polygon.clone().transform(sourceProj, 'EPSG:4326'));
+                    var coordinates = geom.getLinearRing(0).getCoordinates();
+                    area = Math.abs(wgs84Sphere.geodesicArea(coordinates));
+                } else {
+                    area = polygon.getArea();
+                }
+                var output;
+                if (area > 0) {
+                    output = (Math.round(area * 100) / 100) + 'm<sup>2</sup>';
+                } 
+                return output;
+            };
+            
+            var singleclick = function(evt){
+                complete = 0;
+                //더블클릭 속도에 따른 overlay 삭제 방지..... 고려
+                if(typeSelect.value == 'length'){
+                    var coordinate = evt.coordinate;
+                    var z = 1;
+                    
+                    console.log('coordinate = ' + coordinate);
+                    
+                    for(var i=count; i<count+1; i++){
+                        countlatitude[i] = coordinate[1]; //위도
+                        countlongtitude[i] = coordinate[0]; //경도
+                        
+                        console.log('count = ' + i + ' ' + countlongtitude[i], countlatitude[i]);
+                    }
+                    
+                    if(count) {
+                        
+                        
+                        for(var i=aaaa-1; i<aaaa; i++){
+                            console.log('iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii = ' + i);
+                            
+                            distance = getDistanceFromLatLonInKm(countlatitude[i] / 100000, countlongtitude[i] / 100000,
+                                                                countlatitude[i+1] / 100000, countlongtitude[i+1] / 100000);
+//                            console.log(distance, " m");
+                            
+//                            console.log(countlatitude[i], countlatitude[i+1]);
+                            
+                            distanceArray[i+1] = distance.toFixed(2);
+                            
+                            console.log(distanceArray);
+                            
+                            console.log('aaaa = ' + aaaa);
+                        }
+                        
+                        if(countsingleclick > 0){
+                            var popArray = new Array();
+                            
+                            var pop = new ol.Overlay.Popup({insertFirst : false});
+                            map.addOverlay(pop);
+//                            pop.show(coordinate, distance.toFixed(2) + 'm');
+                            
+                            for(var i=0; i<aaaa; i++){
+                                popArray[0] = (countlongtitude[i] + countlongtitude[i+1])/2;
+                                popArray[1] = (countlatitude[i] + countlatitude[i+1])/2;
+                            }
+                            /*console.log('coodinate = ' + coordinate);
+                            console.log('popArray = ' + popArray);*/
+                            
+                            
+                            //console.log(popArray);
+                            
+                            pop.show(popArray, distance.toFixed(2) + 'm');
+                        }
+                        
+                    }
+                    
+                    document.getElementById('ctrly').onclick = function() {
+                        
+//                        console.log(ol.Coordinate);
+                        
+                        ol.geom.LineString.setCoordinates(coordinate);
+                        
+//                        map.addInteraction(coordinate);
+//                        coordinate.addInteraction();
+                        
+                        
+//                        console.log(evt.feature.getGeometry().getCoordinates());
+                        
+                    }
+                    
+                    document.getElementById('finish').onclick = function() {
+                        
+                        draw.finishDrawing();
+                    }
+                    
+                    if(z>0){
+                        count++;
+                        aaaa++;
+                        console.log("z");
+                        ctrlz = 0;
+                    }
+                    
+                    countsingleclick++;
+                    console.log('last count = ' + count);
+                    
+                }else if (typeSelect.value == 'area'){
+                    console.log(evt.coordinate);
+                    
+                    $(".ol-overlay-container").remove();
+                    
+                    console.log(areaClick);
+                    
+                    for(var i=areaClick; i<areaClick+1; i++){
+                        widthArraylatitude[i] = evt.coordinate[0];
+                        widthArraylongtitude[i] = evt.coordinate[1];
+                    }
+                    areaClick++;
+//                    console.log(areaClick);
+                    console.log('widthArraylatitude = ' + widthArraylatitude);
+                    console.log('widthArraylongtitude = ' + widthArraylongtitude);
+                }
+                
+                document.getElementById('ctrlz').onclick = function() {
+                    
+                    if(complete != 1){
+                        if(typeSelect.value == 'length'){
+                            var PopupLength = $(".ol-popup").length;
+                            $(".ol-popup")[PopupLength-1].remove();
+                            draw.removeLastPoint();
+                            PopupLength--;
+
+                            var x = count-1;
+                            countlongtitude[x] = null;
+                            countlatitude[x] = null;
+
+                            z = -1;
+                            count--;
+                            aaaa--;
+
+                            distanceArray[aaaa] = null;
+                            console.log('aaaa = ' + aaaa);
+                            console.log(count);
+
+                            console.log(distanceArray);
+
+                            ctrlz = -1;
+                        }else if(typeSelect.value == 'area'){
+                            draw.removeLastPoint();
+                            areaClick--;
+                            widthArraylatitude[areaClick] = null;
+                            widthArraylongtitude[areaClick] = null;
+                        }
+                        
+                    }else {
+                        alert("You have to draw features");
+                    }
+                }
+            }
+
+            var drawstart = function(evt) {
+                //set sketch
+                sketch = evt.feature;
+                var tooltipCoord = evt.coordinate;
+//                var num = sketch.getGeometry().getCoordinates().length; //광섭형
+
+                listener = sketch.getGeometry().on('change', function(evt) {
+                    var geom = evt.target;
+
+                    if (geom instanceof ol.geom.Polygon) {
+                        output = formatArea(geom);
+                        tooltipCoord = geom.getInteriorPoint().getCoordinates();
+                    } else if (geom instanceof ol.geom.LineString) {
+                        output = formatLength(geom);
+                        tooltipCoord = geom.getLastCoordinate();
+                    }
+                    measureTooltipElement.innerHTML = output;
+                    measureTooltip.setPosition(tooltipCoord);
+                    
+                    TotalMeasureOutput = output;
+                    
+//                    console.log('total length : ' + TotalMeasureOutput);
+                    
+                });
+
+                source.clear();
+                $(".tooltip-static").remove();
+                $(".ol-popup").remove();
+                $(".ol-overlay-container").remove();
+                
+                if(typeSelect.value == 'area') {
+                    listener = sketch.getGeometry().on('change', function(evt) {
+                        geom = evt.target;
+                        
+                        output = formatArea(geom);
+                        tooltipCoord = geom.getInteriorPoint().getCoordinates();
+                    });
+                }
+            }
+
+            var drawend = function(evt) {
+                console.log('ctrlzctrlzctrlzctrlzctrlzctrlzctrlz = ' + ctrlz);
+                
+                var widthArray = new Array();
+                widthArray[0] = 0;
+                widthArray[1] = 0;
+                var rewidthArray = new Array();
+                
+                countsingleclick=0;
+                
+                for(var i=0; i<areaClick; i++){
+                    widthArray[0] = widthArray[0] + widthArraylatitude[i]; //latitude == 0
+                    widthArray[1] = widthArray[1] + widthArraylongtitude[i]; //longtitude == 1
+                    
+                }
+                
+                
+                console.log('widthArray[0] = '+ widthArraylatitude);
+                console.log('widthArray[1] = '+ widthArraylongtitude);
+                
+                var x = evt.feature.getGeometry().getCoordinates();
+                console.log(x);
+                
+                var y = x[0].length-2;
+                
+                widthArray[0] = widthArray[0] + x[0][y][0];
+                widthArray[1] = widthArray[1] + x[0][y][1];
+                
+                rewidthArray[0] = widthArray[0] / (areaClick + 1);
+                rewidthArray[1] = widthArray[1] / (areaClick + 1);
+                
+                console.log(rewidthArray);
+                
+//                if(typeSelect.value == 'area'){
+//                    var pop = new ol.Overlay.Popup({insertFirst : false});
+//                    map.addOverlay(pop);
+//                    pop.show(rewidthArray, TotalMeasureOutput);
+//                }
+                if(typeSelect.value == 'length'){
+                    
+                    lastdistance = TotalMeasureOutput;
+                    console.log('TotalMeasureOutput = ' + TotalMeasureOutput);
+                    console.log('distanceArray = ' + distanceArray);
+                    
+                    for(var k=1; k<distanceArray.length; k++){
+                        lastdistance = lastdistance - distanceArray[k];
+                    }
+                    
+                    var Length = countlatitude.length;
+//                    var LastLongtitude = countlongtitude[Length-1];
+//                    var LastLatitude = countlatitude[Length-1];
+                    var a = evt.feature.getGeometry().getLastCoordinate();
+                    var LastArray = new Array();
+                    var x = Length;
+                    
+                    console.log(countlongtitude);
+                    console.log(countlatitude);
+                    
+                    console.log('distanceArray = ' + distanceArray);
+                    
+                    if(countlongtitude[x] == null && countlatitude[x] == null){
+                        while(1){
+                            x--;
+                            var LastLongtitude = countlongtitude[x];
+                            var LastLatitude = countlatitude[x];
+                            
+                            console.log('LastLongtitude = ' + LastLongtitude);
+                            
+                            if(LastLongtitude != null && LastLatitude != null){
+                                console.log('LastLongtitude = ' + LastLongtitude);
+                                break;
+                            }
+                        }
+                    }
+                    
+                    LastArray[0] = (LastLongtitude + a[0])/2;
+                    LastArray[1] = (LastLatitude + a[1])/2;
+                    
+                    if(Length>1) {
+                        if(lastdistance.toFixed(2) != TotalMeasureOutput){
+                            var pop = new ol.Overlay.Popup({insertFirst : false});
+                            map.addOverlay(pop);
+                            console.log('LastArray = ' + LastArray);
+                            pop.show(LastArray, lastdistance.toFixed(2) + 'm');
+                        }
+                    }
+                    
+                    var pop = new ol.Overlay.Popup({insertFirst : false});
+                    map.addOverlay(pop);
+                    pop.show(evt.feature.getGeometry().getLastCoordinate(), 'total : ' + TotalMeasureOutput + 'm'); 
+                    /*
+                    sketch = null;
+                    measureTooltipElement = null;*/
+                    createMeasureTooltip();
+                    ol.Observable.unByKey(listener);
+                }else if(typeSelect.value == 'area'){
+                    var pop = new ol.Overlay.Popup({insertFirst : false});
+                    map.addOverlay(pop);
+                    //향후 ...... 확인 해야함 배열 참조 복사...
+                    pop.show(JSON.parse(JSON.stringify(rewidthArray)), TotalMeasureOutput);
+                    console.log(rewidthArray);
+                }
+                /******
+                /*초기화
+                *******/
+                aaaa = 0;
+                count = 0;
+                areaClick = 0;
+                countsingleclick = 0;
+                distance = 0;
+                output = 0;
+                TotalMeasureOutput = 0;
+                lastdistance = 0;
+                count = 0;
+                complete = 1;
+                
+                countlatitude.length = 0;
+                countlongtitude.length = 0;
+                distanceArray.length = 0;
+                widthArraylatitude.length = 0;
+                widthArraylongtitude.length = 0;
+                widthArray.length = 0;
+                rewidthArray.length = 0;
+            }
+            
+            function addInteraction() {
+                var count = 0;
+                aaaa = 0;
+                
+                var type = (typeSelect.value == 'area' ? 'Polygon' : 'LineString');
+
+                draw = new ol.interaction.Draw({
+                    source: source,
+                type: /** @type {ol.geom.GeometryType} */ (type),
+                    style: new ol.style.Style({
+                        fill: new ol.style.Fill({
+                            color: 'rgba(255, 255, 255, 0.2)'
+                        }),
+                        stroke: new ol.style.Stroke({
+                            color: 'rgba(0, 0, 0, 0.5)',
+                            lineDash: [10, 10],
+                            width: 2
+                        }),
+                        image: new ol.style.Circle({
+                            radius: 5,
+                            stroke: new ol.style.Stroke({
+                                color: 'rgba(0, 0, 0, 0.7)'
+                            }),
+                            fill: new ol.style.Fill({
+                                color: 'rgba(255, 255, 255, 0.2)'
+                            })
+                        })
+                    })
+                });
+
+                if(typeSelect.value != 'none'){
+                    map.addInteraction(draw);
+                }
+
+                createMeasureTooltip();
+                createHelpTooltip();
+
+                var listener;
+
+                map.on('pointermove', pointerMoveHandler);
+                draw.on('drawstart', drawstart);
+                draw.on('drawend', drawend);
+                map.on('singleclick', singleclick);
+            }
+
+
+
+            /**
+            * Creates a new help tooltip
+            */
+            function createHelpTooltip() {
+                
+                helpTooltipElement = document.createElement('div');
+                helpTooltipElement.className = 'tooltip hidden';
+                helpTooltip = new ol.Overlay({
+                    element: helpTooltipElement,
+                    offset: [15, 0],
+                    positioning: 'center-left'
+                });
+                map.addOverlay(helpTooltip);
+            }
+
+
+            /**
+            * Creates a new measure tooltip
+            */
+            function createMeasureTooltip() {
+                measureTooltipElement = document.createElement('div');
+                measureTooltipElement.className = 'tooltip tooltip-measure';
+                measureTooltip = new ol.Overlay({
+                    element: measureTooltipElement,
+                    offset: [0, -15],
+                    positioning: 'bottom-center'
+                });
+
+                //map.addOverlay(measureTooltip);
+            }
+                
+            function getDistanceFromLatLonInKm(lat1,lng1,lat2,lng2) {
+                function deg2rad(deg) {
+                    return deg * (Math.PI/180)
+                }
+
+                var R = 6378.137; // Radius of the earth in km
+                var dLat = deg2rad(lat2-lat1);  // deg2rad below
+                var dLon = deg2rad(lng2-lng1);
+                var a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.sin(dLon/2) * Math.sin(dLon/2);
+                var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+                var d = R * c; // Distance in km
+                return d * 1000;
+            }
+
+
+            /**
+            * Let user change the geometry type.
+            */
+            typeSelect.onchange = function() {
+                map.removeInteraction(draw);
+                addInteraction();
+            };
+
+            addInteraction();
+            
+            document.getElementById('clearall').onclick = function() {
+                source.clear();
+                if(measureTooltipElement) {
+                    $(".tooltip-static").remove(); //yellow info
+                    $(".tooltip").remove(); //gray info
+                    $(".ol-popup").remove();
+                    $(".ol-overlay-container").remove();
+                }
+            }
+        });
+    </script>
+  </body>
+</html>

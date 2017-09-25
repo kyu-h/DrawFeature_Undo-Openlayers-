@@ -1,0 +1,143 @@
+#content-link  {  }
+	#content-link #page-header > div {  }
+	#content-link #page-header > div > h3 { display:inline-block;padding-right:10px; }
+	#content-link input[type=text]{ width:100%;}
+	#content-link .btn_in_map {float: left; margin: 5px; }
+	#content-link .with_space {margin-top: 5px; margin-left: 30px; margin-right: 5px;}
+
+	#content-link .active {
+		background:#555; color:#FFF;
+	}
+	#content-link .disabled {
+   		pointer-events: none;
+   		cursor: default;
+	}
+	#content-link .none-active {
+		background:#FFF; color:#000;
+	}
+	
+
+.list-map {
+	position:absolute;
+    left: 206px;
+    top: 42px;
+   	width: 177px;
+	z-index:1000; 
+}
+#contentLinkListTbody > tr > td {
+	background:#058ceb;
+	color:#FFF;
+}
+#contentLinkListTbody > tr > td > #chk {
+	background:#FFF;
+}
+
+
+
+#handiTbody::-webkit-scrollbar-track
+{
+	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+	border-radius: 10px;
+	background-color: #F5F5F5;
+}
+
+#handiTbody::-webkit-scrollbar
+{
+	width: 5px;
+	background-color: #F5F5F5;
+}
+
+#handiTbody::-webkit-scrollbar-thumb
+{
+	border-radius: 3px;
+	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);
+	background-color: #555;
+}
+
+
+#handiImageTbody::-webkit-scrollbar-track
+{
+	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+	border-radius: 10px;
+	background-color: #F5F5F5;
+}
+
+#handiImageTbody::-webkit-scrollbar
+{
+	width: 5px;
+	background-color: #F5F5F5;
+}
+
+#handiImageTbody::-webkit-scrollbar-thumb
+{
+	border-radius: 3px;
+	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);
+	background-color: #555;
+}
+
+
+
+#shoppingImageTbody::-webkit-scrollbar-track
+{
+	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+	border-radius: 10px;
+	background-color: #F5F5F5;
+}
+
+#shoppingImageTbody::-webkit-scrollbar
+{
+	width: 5px;
+	background-color: #F5F5F5;
+}
+
+#shoppingImageTbody::-webkit-scrollbar-thumb
+{
+	border-radius: 3px;
+	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);
+	background-color: #555;
+}
+
+
+#entranceImageTbody::-webkit-scrollbar-track
+{
+	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+	border-radius: 10px;
+	background-color: #F5F5F5;
+}
+
+#entranceImageTbody::-webkit-scrollbar
+{
+	width: 5px;
+	background-color: #F5F5F5;
+}
+
+#entranceImageTbody::-webkit-scrollbar-thumb
+{
+	border-radius: 3px;
+	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);
+	background-color: #555;
+}
+
+
+
+
+
+#routeTbody::-webkit-scrollbar-track
+{
+	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+	border-radius: 10px;
+	background-color: #F5F5F5;
+}
+
+#routeTbody::-webkit-scrollbar
+{
+	width: 5px;
+	background-color: #F5F5F5;
+}
+
+#routeTbody::-webkit-scrollbar-thumb
+{
+	border-radius: 3px;
+	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);
+	background-color: #555;
+}
